@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Newton-Raphson Method Calculator{% endblock %}
+
+{% block content %}
+<!-- ═══════════════ HERO + CALCULATOR (two-column) ═══════════════ -->
+<section class="hero-split" id="calculator">
+    <div class="container hero-grid">
+        <!-- Left Column – Big headline -->
+        <div class="hero-left">
+            <span class="hero-tag">NUMERICAL METHODS ENGINE</span>
+            <h2 class="hero-headline">
+                Calculate<br>
+                Newton-Raphson<br>
+                <span class="hero-accent">instantly.</span>
+            </h2>
+            <p class="hero-desc">
+                A precision-engineered numerical calculator for finding roots using the Newton-Raphson iterative method with interactive visual plots.
+            </p>
+        </div>
+
+        <!-- Right Column – Calculator card -->
+        <div class="hero-right">
+            <div class="calc-card">
+                <form id="calcForm" onsubmit="return false;">
+                    <div class="calc-field">
+                        <label for="initial_guess">TARGET X₀ VALUE</label>
+                        <input type="number" id="initial_guess" name="initial_guess"
+                               step="any" value="1" required>
+                    </div>
+                    <div class="calc-field">
+                        <label for="tolerance">TOLERANCE</label>
+                        <input type="number" id="tolerance" name="tolerance"
+                               step="any" value="0.000001" required>
+                    </div>
+                    <div class="calc-field">
+                        <label for="function_input">FUNCTION F(X)</label>
+                        <input type="text" id="function_input" name="function_input"
+                               placeholder="x^3 - x - 2" autocomplete="off" required>
+                    </div>
+                    <div class="calc-field">
+                        <label for="max_iter">MAX ITERATIONS</label>
+                        <input type="number" id="max_iter" name="max_iter"
+                               min="1" max="200" value="50" required>
+                    </div>
+
+                    <!-- Live MathJax preview -->
+                    <div class="calc-preview">
+                        <span class="preview-label">PREVIEW</span>
+                        <div id="latexPreview" class="preview-math">
+                            \( f(x) = \text{enter a function above} \)
+                        </div>
+                    </div>
+
+                    <button type="submit" id="calculateBtn" class="btn-compute">
+                        COMPUTE SOLUTION
+                        <span class="btn-dot"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ RESULTS SECTION ═══════════════ -->
+<section id="results-page" class="section-dark">
+    <div class="container">
+        <div id="errorBanner" class="alert alert-error" style="display: none;">
+            <span class="alert-icon">⚠️</span> <span id="errorMsg"></span>
+        </div>
+
+        <div id="resultsSection" class="results-section" style="display: none;">
+            <div id="successBanner" class="success-banner" style="display: none;">
+                <div class="success-icon">✓</div>
+                <div class="success-text">
+                    <span class="success-label">Root found at</span>
+                    <span class="success-value" id="rootValue"></span>
+                </div>
+            </div>
+
+            <!-- Dynamic Step-by-Step Solution -->
+            <div id="stepsContainer" class="steps-card">
+                <h4>Step-by-Step Solution</h4>
+                <div class="steps-content" id="stepsContent">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <div class="table-header">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <h4>Iteration History</h4>
+                    <button id="findNextRootBtn" class="btn-secondary" title="Randomly perturb x0 to search for other roots">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                        Find Next Root
+                    </button>
+                </div>
+                <button id="exportExcelBtn" class="btn-secondary">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export to Excel (.xlsx)
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table id="resultsTable" class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Iteration (n)</th>
+                            <th>\(x_n\)</th>
+                            <th>\(f(x_n)\)</th>
+                            <th>\(f'(x_n)\)</th>
+                            <th>Error \(|f(x_n)|\)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Desmos Interactive Graph -->
+            <div class="desmos-card">
+                <div class="desmos-header">
+                    <h4>Interactive Function Visualization (Desmos)</h4>
+                    <div class="desmos-controls">
+                        <label for="iterationSlider">Animate Iterations:</label>
+                        <input type="range" id="iterationSlider" min="0" max="0" value="0">
+                        <span id="sliderValue">0</span>
+                        <button id="downloadGraphBtn" class="btn-secondary">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Download PNG
+                        </button>
+                    </div>
+                </div>
+                <div id="calculator-container" style="width: 100%; height: 500px; border-radius: 12px; overflow: hidden;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ THEORY SECTION ═══════════════ -->
+<section id="discussion" class="section-dark">
+    <div class="container">
+        <div class="section-card">
+            <div class="card-header">
+                <span class="card-icon">📘</span>
+                <h3>Mathematical Discussion</h3>
+            </div>
+            <div class="card-body">
+                <p>The <strong>Newton-Raphson method</strong> (also known as Newton's method) is a root-finding algorithm that produces successively better approximations to the roots (or zeroes) of a real-valued function. Given a function \( f(x) \) and its derivative \( f'(x) \), we begin with a first guess \( x_0 \) for a root of the function.</p>
+
+                <p>If the function satisfies sufficient assumptions and the initial guess is close, then a better approximation \( x_1 \) is:</p>
+                <div class="math-box">
+                    \[ x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)} \]
+                </div>
+
+                <h4>Geometric Interpretation</h4>
+                <p>Geometrically, \((x_{n+1}, 0)\) is the x-intercept of the tangent line to the graph of \( f \) at the point \((x_n, f(x_n))\). The process is repeated until a sufficiently precise value is reached.</p>
+
+                <h4>Convergence Properties</h4>
+                <p>Newton's method typically converges quadratically, meaning the number of correct digits roughly doubles with each step. However, it may fail to converge if the derivative is zero at an evaluation point or if the initial guess is too far from the actual root.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════ EXAMPLES SECTION ═══════════════ -->
+<section id="examples" class="section-dark">
+    <div class="container">
+        <h3 class="section-title">Worked Examples</h3>
+        <div class="examples-grid">
+            <div class="example-card">
+                <h4>Example 1: Finding \(\sqrt{2}\)</h4>
+                <p>Find the positive root of \( f(x) = x^2 - 2 \).</p>
+                <div class="step">
+                    <strong>1. Function &amp; Derivative:</strong>
+                    <ul>
+                        <li>\( f(x) = x^2 - 2 \)</li>
+                        <li>\( f'(x) = 2x \)</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <strong>2. Iteration Formula:</strong>
+                    \[ x_{n+1} = x_n - \frac{x_n^2 - 2}{2x_n} \]
+                </div>
+                <div class="step">
+                    <strong>3. Iterations (Starting with \( x_0 = 1 \)):</strong>
+                    <ul>
+                        <li><strong>Iteration 1:</strong> \( x_1 = 1 - \frac{1^2 - 2}{2(1)} = 1.5 \)</li>
+                        <li><strong>Iteration 2:</strong> \( x_2 \approx 1.416667 \)</li>
+                        <li><strong>Iteration 3:</strong> \( x_3 \approx 1.414216 \)</li>
+                    </ul>
+                </div>
+                <p class="example-result success">✓ Converges to \(\sqrt{2} \approx 1.41421356\) very quickly.</p>
+            </div>
+
+            <div class="example-card">
+                <h4>Example 2: Solving \( x^3 - x - 2 = 0 \)</h4>
+                <p>Find the real root of \( f(x) = x^3 - x - 2 \).</p>
+                <div class="step">
+                    <strong>1. Function &amp; Derivative:</strong>
+                    <ul>
+                        <li>\( f(x) = x^3 - x - 2 \)</li>
+                        <li>\( f'(x) = 3x^2 - 1 \)</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <strong>2. Iteration Formula:</strong>
+                    \[ x_{n+1} = x_n - \frac{x_n^3 - x_n - 2}{3x_n^2 - 1} \]
+                </div>
+                <div class="step">
+                    <strong>3. Iterations (Starting with \( x_0 = 1.5 \)):</strong>
+                    <ul>
+                        <li><strong>Iteration 1:</strong> \( x_1 \approx 1.521739 \)</li>
+                        <li><strong>Iteration 2:</strong> \( x_2 \approx 1.521380 \)</li>
+                        <li><strong>Iteration 3:</strong> \( x_3 \approx 1.521380 \)</li>
+                    </ul>
+                </div>
+                <p class="example-result success">✓ Root converges rapidly to \( \approx 1.521380 \).</p>
+            </div>
+
+            <div class="example-card">
+                <h4>Example 3: A Failing Case (Oscillation)</h4>
+                <p>Consider \( f(x) = x^{1/3} \) with \( x_0 = 1 \).</p>
+                <div class="step">
+                    <strong>1. Function &amp; Derivative:</strong>
+                    <ul>
+                        <li>\( f(x) = x^{1/3} \)</li>
+                        <li>\( f'(x) = \frac{1}{3}x^{-2/3} \)</li>
+                    </ul>
+                </div>
+                <div class="step">
+                    <strong>2. Iteration Formula:</strong>
+                    \[ x_{n+1} = x_n - 3x_n = -2x_n \]
+                </div>
+                <div class="step">
+                    <strong>3. Iterations:</strong>
+                    <ul>
+                        <li>\( x_1 = -2 \), \( x_2 = 4 \), \( x_3 = -8 \)</li>
+                    </ul>
+                </div>
+                <p class="example-result fail">✗ The sequence diverges! Newton-Raphson can fail with unfavorable functions.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

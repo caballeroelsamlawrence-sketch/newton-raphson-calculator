@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Newton-Raphson Method{% endblock %}</title>
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Desmos API for Interactive Graphing -->
+    <script src="https://www.desmos.com/api/v1.8/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+    <!-- SheetJS for True Excel (.xlsx) export -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <h1 class="logo">NEWTON-RAPHSON</h1>
+            <ul class="nav-links">
+                <li><a href="#calculator">Calculator</a></li>
+                <li><a href="#results-page">Results</a></li>
+                <li><a href="#discussion">Theory</a></li>
+                <li><a href="#examples">Examples</a></li>
+            </ul>
+            <div class="nav-controls">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle Light/Dark Mode">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                <button id="historyToggle" class="history-toggle" aria-label="Toggle History">
+                    🕒 History
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- History Sidebar -->
+    <div id="historyOverlay" class="history-overlay"></div>
+    <aside id="historySidebar" class="history-sidebar">
+        <div class="sidebar-header">
+            <h3>Calculation History</h3>
+            <button id="closeHistoryBtn" class="close-btn" aria-label="Close History">&times;</button>
+        </div>
+        <div id="historyList" class="history-list">
+            <!-- History items injected by JS -->
+        </div>
+        <div class="sidebar-footer">
+            <button id="clearHistoryBtn" class="btn-secondary" style="width: 100%;">Clear History</button>
+        </div>
+    </aside>
+
+    {% block content %}{% endblock %}
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Numerical Methods Project — Newton-Raphson Method</p>
+        </div>
+    </footer>
+
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
